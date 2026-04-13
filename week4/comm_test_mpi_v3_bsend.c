@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+
+void root_task(int my_rank, int uni_size)
+{
+    int recv_message, count, tag;
+    recv_message = tag = 0;
+    count = 1;
+    MPI_Status status;
+    double start_time, end_time, elapsed_time;
+
+    for (int their_rank = 1; their_rank < uni_size; their_rank++)
+    {
+        start_time = MPI_Wtime();
+        MPI_Recv(&recv_message, count, MPI_INT, their_rank, tag, MPI_COMM_WORLD, &status);
+        end_time = MPI_Wtime();
+
+        elapsed_time = end_time - start_time;
+
+        printf("[MPI_Recv] Rank %d received %d from Rank %d in %lf s\n",
+               my_rank, recv_message, their_rank, elapsed_time);
+    }
+}
+
+void client_task(int my_rank, int uni_size)
+{
+    int send_message, count, dest, tag;
+    double start_time, end_time, elapsed_time;
+
+    count = 1;
+    dest = 0;
+    tag = 0;
+    send_message = my_rank * 10;
+
+    int bsize = MPI_BSEND_OVERHEAD + sizeof(int);
+    void *buffer = malloc(bsize);
+    MPI_Buffer_attach(buffer, bsize);
+
+    start_time = MPI_Wtime();
+    MPI_Bsend(&send_message, count, MPI_INT, dest, tag, MPI_COMM_WORLD);
+    end_time = MPI_Wtime();
+
+    elapsed_time = end_time - start_time;
+
+    MPI_Buffer_detach(&buffer, &bsize);
+    free(buffer);
+
+    printf("[MPI_Bsend] Rank %d sent %d to Rank %d in %lf s\n",
+           my_rank, send_message, dest, elapsed_time);
+}
+
+void check_task(int my_rank, int uni_size)
+{
+    if (0 == my_rank)
+        root_task(my_rank, uni_size);
+    else
+        client_task(my_rank, uni_size);
+}
+
+int check_uni_size(int uni_size)
+{
+    if (uni_size < 2)
+    {
+        printf("Unable to communicate with less than 2 processes. MPI communicator size = %d\n", uni_size);
+        return 1;
+    }
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    int ierror = 0;
+    int my_rank, uni_size;
+    my_rank = uni_size = 0;
+
+    ierror = MPI_Init(&argc, &argv);
+    ierror = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+    ierror = MPI_Comm_size(MPI_COMM_WORLD, &uni_size);
+
+    if (0 == check_uni_size(uni_size))
+        check_task(my_rank, uni_size);
+
+    ierror = MPI_Finalize();
+    return ierror;
+}
+
