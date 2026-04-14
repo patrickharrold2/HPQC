@@ -19,7 +19,7 @@ def main():
     output_file = sys.argv[2]
 
     try:
-        data = pd.read_csv(input_file, skipinitialspace=True)
+        data = pd.read_csv(input_file, comment='#', skipinitialspace=True)
     except FileNotFoundError:
         print("File not found")
         sys.exit(1)
