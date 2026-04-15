@@ -1,10 +1,10 @@
 # HPQC – High Performance and Quantum Computing Portfolio
 
-This repository contains my practical portfolio for the **PHY1090 High Performance and Quantum Computing** module.
+This repository contains my practical work for the **PHY1090 High Performance and Quantum Computing** module.
 
 ## Structure
 
-The repository is organised into sub-directories of each of the classical computing exercises by week, as well as one for the quantum computing tutorial:
+The repository is organised by topic:
 
 * `week2/` – Performance and benchmarking (C vs Python, timing, file I/O)
 * `week3/` – Introduction to MPI (Hello World, vector addition, serial vs parallel)
@@ -18,6 +18,11 @@ Each folder contains the relevant source code and a `README.md` explaining:
 * how to compile and run it
 * what results were obtained and conclusions drawn
 * notes on exercises where no code implementation was required
+
+## Week 1
+
+The Week 1 exercise focused on environment setup and familiarisation with tools such as Git, the HPC system (Cheetah), and compilation workflows.
+As this exercise was primarily setup-based, it does not have a dedicated folder in this repository.
 
 ## Requirements
 
@@ -58,4 +63,3 @@ See individual folders for exact commands and examples.
 ---
 
 This repository is submitted as part of the PHY1090 Practical Portfolio.
-
