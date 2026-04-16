@@ -2,7 +2,7 @@
 
 ## Overview
 
-This week introduced **parallel programming using MPI (Message Passing Interface)**. The goal was to compare **serial and parallel implementations** of simple programs and evaluate performance improvements when using multiple processes.
+This week introduced **parallel programming using MPI (Message Passing Interface)**. The goal was to compare **serial and parallel implementations** of simple programs and evaluate performance when using multiple processes.
 
 Experiments focused on:
 
@@ -65,6 +65,20 @@ mpirun -np <processes> ./vector_mpi [size]
 * Each process identifies itself using its rank
 * Output order is not guaranteed due to parallel execution
 
+#### Timing (MPI Hello World)
+
+| Processes | Real Time |
+| --------- | --------- |
+| 2         | ~0.42s    |
+| 4         | ~0.43s    |
+| 8         | ~0.44s    |
+| 16        | ~0.48s    |
+
+**Observation:**
+
+* Runtime remains roughly constant regardless of process count
+* MPI introduces significant startup overhead (~0.4s), dominating execution time for simple programs
+
 ---
 
 ### 2. Vector Addition (Serial vs MPI)
@@ -82,9 +96,9 @@ mpirun -np <processes> ./vector_mpi [size]
 
 **Observations:**
 
-* Parallel version reduces computation time for larger inputs
-* Overhead exists due to communication between processes
-* For small inputs, parallel version may be slower than serial
+* Internal computation time is reduced by distributing work across processes
+* However, total runtime is dominated by MPI overhead at this scale
+* For the input sizes tested, the serial version is faster overall
 
 ---
 
@@ -92,9 +106,55 @@ mpirun -np <processes> ./vector_mpi [size]
 
 General behaviour observed:
 
-* Increasing the number of processes reduces runtime for large inputs
-* Speedup is not perfectly linear due to communication overhead
-* Efficiency decreases as the number of processes increases beyond optimal levels
+* Increasing the number of processes increases total system work (user + sys time)
+* Real runtime does not significantly decrease due to MPI startup and communication overhead
+* Parallel execution is occurring, but does not provide a real-time speedup for small problem sizes
+
+---
+
+## 4. MPI Program Breakdown (`proof.c`)
+
+The `proof.c` program demonstrates a basic MPI communication pattern using a **root-client model**.
+
+### Structure
+
+* The program initialises MPI and determines the **rank** and **number of processes**
+* One process (rank 0) acts as the **root**
+* All other processes act as **clients**
+
+### Pseudocode
+
+**main():**
+
+* Check input arguments
+* Initialise MPI
+* Get rank and total number of processes
+* Verify communicator size
+* Call appropriate task (root or client)
+* Finalise MPI
+
+**check_task():**
+
+* If rank == 0 → execute root task
+* Else → execute client task
+
+**client_task():**
+
+* Compute value = rank × input argument
+* Send value to root process using `MPI_Send`
+
+**root_task():**
+
+* Loop over all client processes
+* Receive values using `MPI_Recv`
+* Add received values to a running total
+* Print final sum
+
+### Behaviour
+
+* Each client computes a partial result independently
+* The root process collects and sums all results
+* This demonstrates a simple **parallel reduction pattern** using point-to-point communication
 
 ---
 
@@ -103,9 +163,9 @@ General behaviour observed:
 From the experiments:
 
 * MPI enables parallel execution by distributing work across multiple processes
-* Parallel programs can significantly outperform serial versions for large workloads
-* Communication overhead limits performance gains, especially for small tasks
-* Optimal performance depends on balancing computation and communication costs
-* Understanding workload distribution is key to efficient parallel programming
+* Parallel programs reduce internal computation time, but overall runtime can be dominated by overhead
+* For small workloads, serial implementations are faster due to the cost of process startup and communication
+* Performance improvements from MPI depend on sufficiently large problem sizes
+* Understanding the balance between computation and communication is essential for efficient parallel programming
 
-Overall, MPI provides a powerful framework for parallel computation, but performance gains depend on problem size and implementation efficiency.
+Overall, MPI provides a powerful framework for parallel computation, but performance gains depend strongly on problem size and overhead costs.
