@@ -87,6 +87,7 @@ mpirun -np <processes> ./vector_mpi [size]
 
 * Entire computation performed by a single process
 * Runtime increases linearly with vector size
+* The original demonstration code was modified so that the vector contains **non-trivial values** rather than zeros, ensuring meaningful computation and avoiding trivial results
 
 #### MPI
 
