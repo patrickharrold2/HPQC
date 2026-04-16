@@ -217,8 +217,26 @@ This makes it possible to study how runtime changes with message size.
 | 262144 B     |    0.785587 |                  0.000079 |
 | 1048576 B    |    2.589125 |                  0.000259 |
 
-For very small messages, latency dominates. Once messages become larger, elapsed time grows roughly linearly with size. From the organised results, the data suggests an effective bandwidth in the order of **hundreds of MB/s, around 400 MB/s**, with a baseline latency around **1 µs**.
+### Bandwidth Plot
 
+<img width="759" height="488" alt="image" src="https://github.com/user-attachments/assets/b08fbd69-26ea-411a-ab45-4c834027dec1" />
+
+<img width="584" height="438" alt="image" src="https://github.com/user-attachments/assets/a54e1407-6a3e-4a4e-9dce-f06854b1aee4" />
+
+Displayed is the average time against the bytes. The second plot uses a logarithmic x-axis to better visualise behaviour across multiple orders of magnitude, particularly for small message sizes.
+
+A linear fit of average time vs message size gives:
+
+- slope ≈ 2.44 × 10⁻¹⁰ s/byte  
+- intercept ≈ 5.39 × 10⁻⁶ s  
+
+This corresponds to:
+
+- latency ≈ 5 µs  
+- bandwidth ≈ 1 / slope ≈ 4 GB/s  
+
+This shows that small messages are latency-dominated, while larger messages exhibit bandwidth-limited behaviour.
+For very small messages, latency dominates. Once messages become larger, elapsed time grows roughly linearly with size. From the bandwidth test, a linear fit gave an estimated bandwidth of approximately 4 GB/s and latency of approximately 5 µs.
 ---
 
 ## Part 3 – Collective Communications
