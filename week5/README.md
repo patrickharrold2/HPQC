@@ -1,0 +1,226 @@
+# Week 5 – Communicators and Topologies
+
+## Overview
+
+This week focused on modelling oscillations on a string and then parallelising that model with MPI. The work progressed from an original serial program, to an improved serial version, to MPI implementations using different communication topologies.
+
+The main aims were:
+
+* to understand the structure of the serial string model
+* to remove hard-coding and improve usability
+* to parallelise the simulation with MPI
+* to compare a linear topology with a ring topology
+* to evaluate whether this problem benefits from parallel execution
+
+---
+
+## Programs Included
+
+* `string_wave.c` – original serial implementation
+* `string_wave_v2.c` – improved serial implementation with command-line arguments
+* `string_wave_mpi.c` – MPI implementation using a linear topology
+* `string_wave_mpi_ring.c` – MPI implementation using a ring topology
+* `animate_line_file.py` – animation script with input/output arguments
+* `animate_line_file_v2.py` – more modular animation script
+
+---
+
+## How to Compile and Run
+
+### Part 1 – Serial String Wave
+
+```bash
+gcc PHY1090/week5/string_wave.c -o bin/string_wave -lm
+./bin/string_wave 50
+python3 PHY1090/week5/animate_line_file.py data/string_wave.csv serial.gif
+```
+
+### Improved Serial Version
+
+```bash
+gcc HPQC/week5/string_wave_v2.c -o ~/bin/string_wave_v2 -lm
+./bin/string_wave_v2 <points> <cycles> <samples> <output_file>
+```
+
+### Part 2 – MPI String Wave (Linear Topology)
+
+```bash
+mpicc HPQC/week5/string_wave_mpi.c -o ~/bin/string_wave_mpi -lm
+
+time mpirun -np 1 ~/bin/string_wave_mpi 48 5 25 ~/data/test1.csv
+time mpirun -np 2 ~/bin/string_wave_mpi 48 5 25 ~/data/test2.csv
+time mpirun -np 4 ~/bin/string_wave_mpi 48 5 25 ~/data/test3.csv
+
+python3 PHY1090/week5/animate_line_file.py ~/data/test1.csv linear.gif
+```
+
+### Part 3 – MPI String Wave (Ring Topology)
+
+```bash
+mpicc HPQC/week5/string_wave_mpi_ring.c -o ~/bin/string_wave_mpi_ring -lm
+
+time mpirun -np 1 ~/bin/string_wave_mpi_ring 48 5 25 ~/data/ring1.csv
+time mpirun -np 2 ~/bin/string_wave_mpi_ring 48 5 25 ~/data/ring2.csv
+time mpirun -np 4 ~/bin/string_wave_mpi_ring 48 5 25 ~/data/ring3.csv
+
+python3 PHY1090/week5/animate_line_file.py ~/data/ring1.csv ring.gif
+```
+
+---
+
+## Part 1 – Serial Code
+
+### Original Serial Version
+
+The original `string_wave.c` program simulates a simple wave on a string using hard-coded parameters for cycles, samples, and output location.
+
+At each time step:
+
+* the first point is driven by a sine function
+* each subsequent point takes the value of its left neighbour
+* all positions are written to a CSV file
+
+This produces a travelling wave moving from left to right.
+
+---
+
+### Improvements in `string_wave_v2.c`
+
+The improved version removes hard-coded values and introduces a modular structure.
+
+Key improvements:
+
+* command-line arguments for `points`, `cycles`, `samples`, and output file
+* flexible file handling instead of fixed output path
+* clearer structure using functions:
+
+  * `check_args()`
+  * `initialise_vector()`
+  * `generate_timestamps()`
+  * `update_positions()`
+  * `print_header()`
+
+This makes the code easier to read, reuse, and extend for MPI.
+
+---
+
+### Serial Model Behaviour
+
+The simulation:
+
+1. generates timestamps
+2. initialises positions to zero
+3. applies a sinusoidal driver at the first point
+4. shifts values along the string
+
+This creates a clear travelling wave suitable for visualisation.
+
+---
+
+## Part 2 – MPI Parallel Simulation (Linear Topology)
+
+### Domain Decomposition
+
+The string is split across processes:
+
+```c
+local_n = points / size;
+```
+
+Each process updates its own section.
+
+---
+
+### Communication and Aggregation
+
+* neighbouring processes exchange boundary values
+* rank 0 applies the driving force
+* `MPI_Gather` collects all data on rank 0
+* only rank 0 writes to the output file
+
+---
+
+### Performance (Linear)
+
+| Processes | Real Time |
+| --------- | --------- |
+| 1         | ~0.41 s   |
+| 2         | ~0.47 s   |
+| 4         | ~0.44 s   |
+
+No meaningful speedup was observed due to communication overhead dominating computation.
+
+---
+
+## Part 3 – Ring Topology
+
+### Topology Change
+
+The neighbour structure becomes:
+
+```c
+int left  = (rank - 1 + size) % size;
+int right = (rank + 1) % size;
+```
+
+This creates **periodic boundary conditions**, connecting the ends of the domain.
+
+---
+
+### Communication
+
+* implemented using `MPI_Sendrecv`
+* all processes communicate every timestep
+* no special boundary cases required
+
+---
+
+### Behaviour
+
+* linear: wave travels across the domain
+* ring: wave wraps around continuously
+
+Despite this, the animations appear very similar because the update rule only depends on the left neighbour.
+
+---
+
+### Performance (Ring)
+
+| Processes | Real Time |
+| --------- | --------- |
+| 1         | ~0.40 s   |
+| 2         | ~0.53 s   |
+| 4         | ~0.47 s   |
+
+Again, no performance gain due to communication cost.
+
+---
+
+## Visualisation
+
+### Serial
+
+![Serial animation](path/to/serial.gif)
+
+### MPI Linear Topology
+
+![Linear animation](path/to/linear.gif)
+
+### MPI Ring Topology
+
+![Ring animation](path/to/ring.gif)
+
+The serial and MPI outputs are visually identical, confirming correctness, while the ring topology introduces periodic boundary conditions without significantly altering the observed wave behaviour.
+
+---
+
+## Conclusions
+
+* serial model successfully simulates wave propagation
+* v2 improves structure and usability
+* MPI implementation correctly reproduces results
+* no speedup due to communication overhead
+* ring topology introduces periodic boundaries
+* communication dominates computation in this problem
+
+This demonstrates that parallelisation must be matched carefully to problem size and communication requirements.
