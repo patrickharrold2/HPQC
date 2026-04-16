@@ -1,4 +1,4 @@
-<img width="640" height="480" alt="animate_string_file" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" /># Week 5 – Communicators and Topologies
+# Week 5 – Communicators and Topologies
 
 ## Overview
 
@@ -201,14 +201,15 @@ Again, no performance gain due to communication cost.
 ### Serial
 
 ![Serial animation]("C:\Users\5415h\OneDrive\Documentos\QC_HPC\gifs\animate_string_file.gif")
-
+<img width="640" height="480" alt="animate_string_file" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" />
 ### MPI Linear Topology
 
 ![Linear animation]("C:\Users\5415h\OneDrive\Documentos\QC_HPC\gifs\output.gif")
-
+<img width="640" height="480" alt="output" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" />
 ### MPI Ring Topology
 
 ![Ring animation]("C:\Users\5415h\OneDrive\Documentos\QC_HPC\ring.gif")
+<img width="640" height="480" alt="ring" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" />
 
 The serial and MPI outputs are visually identical, confirming correctness, while the ring topology introduces periodic boundary conditions without significantly altering the observed wave behaviour.
 
