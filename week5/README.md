@@ -30,9 +30,9 @@ The main aims were:
 ### Part 1 – Serial String Wave
 
 ```bash
-gcc PHY1090/week5/string_wave.c -o bin/string_wave -lm
+gcc HPQC/week5/string_wave.c -o ~/bin/string_wave -lm
 ./bin/string_wave 50
-python3 PHY1090/week5/animate_line_file.py data/string_wave.csv serial.gif
+python3 HPQC/week5/animate_line_file.py data/string_wave.csv serial.gif
 ```
 
 ### Improved Serial Version
@@ -46,25 +46,21 @@ gcc HPQC/week5/string_wave_v2.c -o ~/bin/string_wave_v2 -lm
 
 ```bash
 mpicc HPQC/week5/string_wave_mpi.c -o ~/bin/string_wave_mpi -lm
-
-time mpirun -np 1 ~/bin/string_wave_mpi 48 5 25 ~/data/test1.csv
-time mpirun -np 2 ~/bin/string_wave_mpi 48 5 25 ~/data/test2.csv
-time mpirun -np 4 ~/bin/string_wave_mpi 48 5 25 ~/data/test3.csv
-
-python3 PHY1090/week5/animate_line_file.py ~/data/test1.csv linear.gif
+time mpirun -np <processes> ~/bin/string_wave_mpi 48 5 25 <output_file>
+python3 HPQC/week5/animate_line_file.py <output_file> linear.gif
 ```
+
+Tested with 1, 2, and 4 processes.
 
 ### Part 3 – MPI String Wave (Ring Topology)
 
 ```bash
 mpicc HPQC/week5/string_wave_mpi_ring.c -o ~/bin/string_wave_mpi_ring -lm
-
-time mpirun -np 1 ~/bin/string_wave_mpi_ring 48 5 25 ~/data/ring1.csv
-time mpirun -np 2 ~/bin/string_wave_mpi_ring 48 5 25 ~/data/ring2.csv
-time mpirun -np 4 ~/bin/string_wave_mpi_ring 48 5 25 ~/data/ring3.csv
-
-python3 PHY1090/week5/animate_line_file.py ~/data/ring1.csv ring.gif
+time mpirun -np <processes> ~/bin/string_wave_mpi_ring 48 5 25 <output_file>
+python3 HPQC/week5/animate_line_file.py <output_file> ring.gif
 ```
+
+Tested with 1, 2, and 4 processes.
 
 ---
 
@@ -148,7 +144,7 @@ Each process updates its own section.
 | 2         | ~0.47 s   |
 | 4         | ~0.44 s   |
 
-No meaningful speedup was observed due to communication overhead dominating computation.
+No meaningful speedup was observed because communication overhead dominated computation.
 
 ---
 
@@ -171,14 +167,14 @@ This creates **periodic boundary conditions**, connecting the ends of the domain
 
 * implemented using `MPI_Sendrecv`
 * all processes communicate every timestep
-* no special boundary cases required
+* no special boundary cases are required
 
 ---
 
 ### Behaviour
 
-* linear: wave travels across the domain
-* ring: wave wraps around continuously
+* linear topology: the wave travels across the domain
+* ring topology: the wave wraps around continuously
 
 Despite this, the animations appear very similar because the update rule only depends on the left neighbour.
 
@@ -192,7 +188,7 @@ Despite this, the animations appear very similar because the update rule only de
 | 2         | ~0.53 s   |
 | 4         | ~0.47 s   |
 
-Again, no performance gain due to communication cost.
+Again, no performance gain was observed because communication cost outweighed the computational benefit.
 
 ---
 
@@ -200,28 +196,33 @@ Again, no performance gain due to communication cost.
 
 ### Serial
 
-![Serial animation]("C:\Users\5415h\OneDrive\Documentos\QC_HPC\gifs\animate_string_file.gif")
+<div align="center">
 <img width="640" height="480" alt="animate_string_file" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" />
+</div>
+
 ### MPI Linear Topology
 
-![Linear animation]("C:\Users\5415h\OneDrive\Documentos\QC_HPC\gifs\output.gif")
-<img width="640" height="480" alt="output" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" />
+<div align="center">
+<img width="640" height="480" alt="mpi_output" src="https://github.com/user-attachments/assets/b71ef2a3-81c5-4ec9-b156-3611ade0e735" />
+</div>
+
 ### MPI Ring Topology
 
-![Ring animation]("C:\Users\5415h\OneDrive\Documentos\QC_HPC\ring.gif")
-<img width="640" height="480" alt="ring" src="https://github.com/user-attachments/assets/9f2e1ec7-b27c-4124-870b-44cd50128ed1" />
+<div align="center">
+<img width="640" height="480" alt="ring" src="https://github.com/user-attachments/assets/f3fd1a5a-19b1-4516-83c6-f08545f4a765" />
+</div>
 
-The serial and MPI outputs are visually identical, confirming correctness, while the ring topology introduces periodic boundary conditions without significantly altering the observed wave behaviour.
+The serial and MPI outputs are visually very similar, confirming that the parallel implementations preserve the behaviour of the original model. The ring topology adds periodic boundary conditions without significantly changing the observed wave pattern for this simple update rule.
 
 ---
 
 ## Conclusions
 
-* serial model successfully simulates wave propagation
-* v2 improves structure and usability
-* MPI implementation correctly reproduces results
-* no speedup due to communication overhead
-* ring topology introduces periodic boundaries
-* communication dominates computation in this problem
+* the serial model successfully simulates wave propagation
+* `string_wave_v2.c` improves structure and usability
+* the MPI implementations correctly reproduce the expected behaviour
+* no speedup was observed for the tested problem size because communication overhead dominates
+* the ring topology introduces periodic boundaries
+* communication cost is a key factor in deciding whether parallelisation is worthwhile
 
-This demonstrates that parallelisation must be matched carefully to problem size and communication requirements.
+This exercise showed that parallelisation must be matched carefully to both problem size and communication requirements.
