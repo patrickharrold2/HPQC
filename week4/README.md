@@ -35,14 +35,16 @@ The aim was not just to make the programs run, but to compare how different comm
 
 ```bash
 # Communication tests
-mpicc HPQC/week4/comm_test_mpi*.c -o ~/bin/
+mpicc HPQC/week4/comm_test_mpi_*.c -o ~/bin/
 
 # Ping-pong tests
-mpicc HPQC/week4/pingpong*.c -o ~/bin/
+mpicc HPQC/week4/pingpong_*.c -o ~/bin/
 
 # Collective tests
-mpicc HPQC/week4/vector_mpi*.c -o ~/bin/
+mpicc HPQC/week4/vector_mpi_*.c -o ~/bin/
 ```
+
+where * is one of the variants
 
 ### Run
 
