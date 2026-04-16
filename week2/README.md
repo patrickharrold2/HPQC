@@ -4,7 +4,7 @@
 
 This week focused on benchmarking and analysing the performance of programs using different timing methods. Experiments were carried out using both **C (compiled)** and **Python (interpreted)** implementations to compare execution time across a variety of tasks.
 
-The `time` command was used to measure overall runtime (wall clock time), while internal timing methods were used to measure specific code sections. 
+The `time` command was used to measure overall runtime (wall clock time), while internal timing methods were used to measure specific code sections.
 
 ---
 
@@ -22,19 +22,17 @@ The `time` command was used to measure overall runtime (wall clock time), while 
 
 ### Compile (C)
 
-```bash
 gcc file.c -o ~/bin/file
-```
 
 ### Run
 
-```bash
 # C
+
 time ~/bin/file [args]
 
 # Python
+
 time python3 file.py [args]
-```
 
 ---
 
@@ -124,8 +122,7 @@ C executes significantly faster than Python. This reflects the difference betwee
 
 **Observations:**
 
-* C is significantly faster for file writing operations.
-* File reading times are more similar between C and Python.
+* C is significantly faster for file I/O operations than Python.
 * Runtime scales with file size in both languages.
 * File I/O is slower than simple computation due to system-level operations.
 
